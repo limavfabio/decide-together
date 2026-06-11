@@ -6,6 +6,7 @@
     "build": "react-router build",
     "dev": "react-router dev",
     "start": "react-router-serve ./build/server/index.js",
+    "test": "vitest run",
     "typecheck": "react-router typegen && tsc"
   },
   "dependencies": {
@@ -30,6 +31,7 @@
     "drizzle-kit": "^0.31.10",
     "tailwindcss": "^4.2.2",
     "typescript": "^5.9.3",
-    "vite": "^8.0.3"
+    "vite": "^8.0.3",
+    "vitest": "^4.1.8"
   }
 }
