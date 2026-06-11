@@ -1,5 +1,6 @@
 .DS_Store
 .env
+sqlite.db
 /node_modules/
 
 # React Router
