@@ -1,7 +1,7 @@
 import { and, count, eq, inArray, sql } from "drizzle-orm";
 
 import { db } from "~/db.server";
-import { roomOptions, rooms, votes } from "./schema";
+import { roomOptions, rooms, votes } from "./schema.server";
 
 export async function insertRoom(question: string, options: string[]) {
   const roomId = crypto.randomUUID();
