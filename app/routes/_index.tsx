@@ -1,8 +1,14 @@
+import { useEffect, useState } from "react";
 import { Form, redirect } from "react-router";
 import * as z from "zod";
 
 import type { Route } from "./+types/_index";
-import { parseCreateRoomForm } from "~/domains/rooms/params";
+import {
+  DEFAULT_ROOM_OPTIONS,
+  MAX_ROOM_OPTIONS,
+  MIN_ROOM_OPTIONS,
+  parseCreateRoomForm,
+} from "~/domains/rooms/params";
 import { createRoom } from "~/domains/rooms/room.server";
 
 export function meta({}: Route.MetaArgs) {
@@ -37,7 +43,36 @@ export async function action({ request }: Route.ActionArgs) {
 export default function Home({ actionData }: Route.ComponentProps) {
   const values = actionData?.values;
   const errors = actionData?.errors;
-  const options = values?.options.length ? values.options : ["", "", "", ""];
+  const initialOptions = normalizeOptionRows(values?.options);
+  const [options, setOptions] = useState(initialOptions);
+
+  useEffect(() => {
+    setOptions(initialOptions);
+  }, [initialOptions.join("\u0000")]);
+
+  function addOption() {
+    setOptions((currentOptions) =>
+      currentOptions.length >= MAX_ROOM_OPTIONS
+        ? currentOptions
+        : [...currentOptions, ""],
+    );
+  }
+
+  function removeOption(index: number) {
+    setOptions((currentOptions) =>
+      currentOptions.length <= MIN_ROOM_OPTIONS
+        ? currentOptions
+        : currentOptions.filter((_, optionIndex) => optionIndex !== index),
+    );
+  }
+
+  function updateOption(index: number, value: string) {
+    setOptions((currentOptions) =>
+      currentOptions.map((option, optionIndex) =>
+        optionIndex === index ? value : option,
+      ),
+    );
+  }
 
   return (
     <main className="min-h-screen bg-[#f5f1e8] text-[#221f1a]">
@@ -84,22 +119,31 @@ export default function Home({ actionData }: Route.ComponentProps) {
                 Options
               </label>
               <p className="text-sm font-semibold text-[#6f675c]">
-                3 required, 1 optional
+                2-10 choices
               </p>
             </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {[0, 1, 2, 3].map((index) => (
-                <input
-                  key={index}
-                  name="option"
-                  type="text"
-                  maxLength={80}
-                  defaultValue={options[index] ?? ""}
-                  placeholder={
-                    index === 3 ? "Optional wild card" : `Option ${index + 1}`
-                  }
-                  className="border-2 border-[#221f1a] bg-white px-4 py-3 font-semibold outline-none transition focus:shadow-[5px_5px_0_#221f1a]"
-                />
+            <div className="grid gap-3">
+              {options.map((option, index) => (
+                <div key={index} className="flex gap-2">
+                  <input
+                    name="option"
+                    type="text"
+                    maxLength={80}
+                    value={option}
+                    onChange={(event) => updateOption(index, event.target.value)}
+                    placeholder={`Option ${index + 1}`}
+                    className="min-w-0 flex-1 border-2 border-[#221f1a] bg-white px-4 py-3 font-semibold outline-none transition focus:shadow-[5px_5px_0_#221f1a]"
+                  />
+                  {options.length > MIN_ROOM_OPTIONS ? (
+                    <button
+                      type="button"
+                      onClick={() => removeOption(index)}
+                      className="border-2 border-[#221f1a] bg-white px-4 py-3 text-sm font-black uppercase tracking-[0.08em] transition hover:-translate-y-0.5 hover:shadow-[4px_4px_0_#221f1a]"
+                    >
+                      Remove
+                    </button>
+                  ) : null}
+                </div>
               ))}
             </div>
             {errors?.options ? (
@@ -107,6 +151,14 @@ export default function Home({ actionData }: Route.ComponentProps) {
                 {errors.options[0]}
               </p>
             ) : null}
+            <button
+              type="button"
+              onClick={addOption}
+              disabled={options.length >= MAX_ROOM_OPTIONS}
+              className="mt-4 border-2 border-[#221f1a] bg-white px-4 py-3 text-sm font-black uppercase tracking-[0.1em] transition enabled:hover:-translate-y-0.5 enabled:hover:shadow-[4px_4px_0_#221f1a] disabled:cursor-not-allowed disabled:opacity-45"
+            >
+              Add option
+            </button>
           </div>
 
           <button
@@ -119,4 +171,16 @@ export default function Home({ actionData }: Route.ComponentProps) {
       </section>
     </main>
   );
+}
+
+function normalizeOptionRows(options: string[] | undefined) {
+  const rows = options?.length
+    ? options.slice(0, MAX_ROOM_OPTIONS)
+    : Array.from({ length: DEFAULT_ROOM_OPTIONS }, () => "");
+
+  while (rows.length < MIN_ROOM_OPTIONS) {
+    rows.push("");
+  }
+
+  return rows;
 }

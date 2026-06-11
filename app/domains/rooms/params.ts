@@ -1,5 +1,9 @@
 import * as z from "zod";
 
+export const MIN_ROOM_OPTIONS = 2;
+export const MAX_ROOM_OPTIONS = 10;
+export const DEFAULT_ROOM_OPTIONS = 2;
+
 const optionLabel = z
   .string()
   .trim()
@@ -15,8 +19,8 @@ export const createRoomParams = z
       .max(140, "Keep the question under 140 characters"),
     options: z
       .array(optionLabel)
-      .min(3, "Add at least 3 options")
-      .max(4, "Add no more than 4 options"),
+      .min(MIN_ROOM_OPTIONS, "Add at least 2 options")
+      .max(MAX_ROOM_OPTIONS, "Add no more than 10 options"),
   })
   .superRefine(({ options }, ctx) => {
     const seen = new Set<string>();
