@@ -1,87 +1,81 @@
-# Welcome to React Router!
+# Decide Together
 
-A modern, production-ready template for building full-stack React applications using React Router.
+Small React Router app for creating a shared voting room and letting a group pick from a short list of options.
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
+## Stack
 
-## Features
+- React Router 7 with server-side rendering
+- Cloudflare Workers runtime
+- Cloudflare D1 bound as `DB`
+- Drizzle schema and generated SQL migrations
+- Tailwind CSS
+- Vitest
 
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
+## Development
 
-## Getting Started
-
-### Installation
-
-Install the dependencies:
+Install dependencies:
 
 ```bash
-npm install
+pnpm install
 ```
 
-### Development
-
-Start the development server with HMR:
+Generate Worker and React Router types:
 
 ```bash
-npm run dev
+pnpm typegen
 ```
 
-Your application will be available at `http://localhost:5173`.
-
-## Building for Production
-
-Create a production build:
+Start the development server:
 
 ```bash
-npm run build
+pnpm dev
+```
+
+The app uses the Cloudflare Vite plugin in development so local behavior stays close to the deployed Worker.
+
+## Database
+
+The only supported database is Cloudflare D1. The Worker expects a D1 binding named `DB`, configured in `wrangler.json` with database name `decide-together`.
+
+Drizzle schema files remain the source of truth:
+
+```bash
+pnpm db:generate
+```
+
+Apply existing migrations to the local D1 database:
+
+```bash
+pnpm db:migrate
+```
+
+Apply migrations to the remote D1 database:
+
+```bash
+pnpm db:migrate:remote
+```
+
+If the D1 database has not been created yet:
+
+```bash
+pnpm exec wrangler d1 create decide-together
+```
+
+Copy the returned database id into `wrangler.json`.
+
+## Verification
+
+```bash
+pnpm test
+pnpm typecheck
+pnpm build
+pnpm exec wrangler deploy --dry-run
 ```
 
 ## Deployment
 
-### Docker Deployment
-
-To build and run using Docker:
+Deploy to Cloudflare Workers:
 
 ```bash
-docker build -t my-app .
-
-# Run the container
-docker run -p 3000:3000 my-app
+pnpm deploy
 ```
-
-The containerized application can be deployed to any platform that supports Docker, including:
-
-- AWS ECS
-- Google Cloud Run
-- Azure Container Apps
-- Digital Ocean App Platform
-- Fly.io
-- Railway
-
-### DIY Deployment
-
-If you're familiar with deploying Node applications, the built-in app server is production-ready.
-
-Make sure to deploy the output of `npm run build`
-
-```
-├── package.json
-├── package-lock.json (or pnpm-lock.yaml, or bun.lockb)
-├── build/
-│   ├── client/    # Static assets
-│   └── server/    # Server-side code
-```
-
-## Styling
-
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
-
----
-
-Built with ❤️ using React Router.

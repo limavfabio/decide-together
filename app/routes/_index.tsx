@@ -9,6 +9,7 @@ import {
   MIN_ROOM_OPTIONS,
   parseCreateRoomForm,
 } from "~/domains/rooms/params";
+import { dbFromContext } from "~/context.server";
 import { createRoom } from "~/domains/rooms/room.server";
 
 const questionPlaceholders = [
@@ -39,7 +40,7 @@ export function loader() {
   };
 }
 
-export async function action({ request }: Route.ActionArgs) {
+export async function action({ context, request }: Route.ActionArgs) {
   const formData = await request.formData();
   const createRoomParams = parseCreateRoomForm(formData);
 
@@ -53,7 +54,7 @@ export async function action({ request }: Route.ActionArgs) {
     };
   }
 
-  const roomId = await createRoom(createRoomParams.data);
+  const roomId = await createRoom(dbFromContext(context), createRoomParams.data);
 
   return redirect(`/rooms/${roomId}`);
 }

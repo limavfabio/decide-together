@@ -3,6 +3,7 @@ import { data, Form, useFetcher, useRevalidator } from "react-router";
 import * as z from "zod";
 
 import type { Route } from "./+types/rooms.$roomId";
+import { dbFromContext } from "~/context.server";
 import { parseVoteForm } from "~/domains/rooms/params";
 import { castVote, getRoom } from "~/domains/rooms/room.server";
 import { ensureVoterId, getVoterId, voterCookieHeader } from "~/domains/rooms/voter-cookie.server";
@@ -14,8 +15,8 @@ export function meta({ data: loaderData }: Route.MetaArgs) {
   ];
 }
 
-export async function loader({ params, request }: Route.LoaderArgs) {
-  const room = await getRoom(params.roomId, getVoterId(request));
+export async function loader({ context, params, request }: Route.LoaderArgs) {
+  const room = await getRoom(dbFromContext(context), params.roomId, getVoterId(request));
 
   if (!room) {
     throw data("Sala não encontrada", { status: 404 });
@@ -24,7 +25,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   return room;
 }
 
-export async function action({ params, request }: Route.ActionArgs) {
+export async function action({ context, params, request }: Route.ActionArgs) {
   const formData = await request.formData();
   const result = parseVoteForm(formData);
   const voterId = ensureVoterId(request);
@@ -36,7 +37,7 @@ export async function action({ params, request }: Route.ActionArgs) {
     );
   }
 
-  const vote = await castVote(params.roomId, voterId, result.data);
+  const vote = await castVote(dbFromContext(context), params.roomId, voterId, result.data);
 
   if (!vote.ok) {
     return data(

@@ -1,0 +1,21 @@
+{
+  "name": "decide-together",
+  "main": "./workers/app.ts",
+  "compatibility_date": "2026-06-13",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "./build/client"
+  },
+  "observability": {
+    "enabled": true
+  },
+  "upload_source_maps": true,
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "decide-together",
+      "database_id": "1599ea19-31e4-48fe-bedf-c07a420e9daa",
+      "migrations_dir": "drizzle"
+    }
+  ]
+}

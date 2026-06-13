@@ -1,3 +1,9 @@
-import { drizzle } from "drizzle-orm/better-sqlite3";
+import { drizzle, type DrizzleD1Database } from "drizzle-orm/d1";
 
-export const db = drizzle(process.env.DB_FILE_NAME ?? "sqlite.db");
+import * as schema from "~/domains/rooms/schema.server";
+
+export function createDb(d1: D1Database) {
+  return drizzle(d1, { schema });
+}
+
+export type Db = DrizzleD1Database<typeof schema>;

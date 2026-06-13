@@ -1,9 +1,9 @@
 import { and, count, eq, inArray, sql } from "drizzle-orm";
 
-import { db } from "~/db.server";
+import type { Db } from "~/db.server";
 import { roomOptions, rooms, votes } from "./schema.server";
 
-export async function insertRoom(question: string, options: string[]) {
+export async function insertRoom(db: Db, question: string, options: string[]) {
   const roomId = crypto.randomUUID();
 
   await db.insert(rooms).values({
@@ -23,13 +23,13 @@ export async function insertRoom(question: string, options: string[]) {
   return roomId;
 }
 
-export async function findRoom(roomId: string) {
+export async function findRoom(db: Db, roomId: string) {
   const [room] = await db.select().from(rooms).where(eq(rooms.id, roomId)).limit(1);
 
   return room ?? null;
 }
 
-export async function listRoomOptions(roomId: string) {
+export async function listRoomOptions(db: Db, roomId: string) {
   return db
     .select()
     .from(roomOptions)
@@ -37,7 +37,7 @@ export async function listRoomOptions(roomId: string) {
     .orderBy(roomOptions.position);
 }
 
-export async function listVoteTotals(optionIds: string[]) {
+export async function listVoteTotals(db: Db, optionIds: string[]) {
   if (optionIds.length === 0) {
     return new Map<string, number>();
   }
@@ -54,7 +54,11 @@ export async function listVoteTotals(optionIds: string[]) {
   return new Map(rows.map((row) => [row.optionId, row.total]));
 }
 
-export async function findVoterOption(roomId: string, voterId: string | null) {
+export async function findVoterOption(
+  db: Db,
+  roomId: string,
+  voterId: string | null,
+) {
   if (!voterId) {
     return null;
   }
@@ -68,7 +72,11 @@ export async function findVoterOption(roomId: string, voterId: string | null) {
   return vote?.optionId ?? null;
 }
 
-export async function optionBelongsToRoom(roomId: string, optionId: string) {
+export async function optionBelongsToRoom(
+  db: Db,
+  roomId: string,
+  optionId: string,
+) {
   const [option] = await db
     .select({ id: roomOptions.id })
     .from(roomOptions)
@@ -78,7 +86,12 @@ export async function optionBelongsToRoom(roomId: string, optionId: string) {
   return Boolean(option);
 }
 
-export async function upsertVote(roomId: string, voterId: string, optionId: string) {
+export async function upsertVote(
+  db: Db,
+  roomId: string,
+  voterId: string,
+  optionId: string,
+) {
   await db
     .insert(votes)
     .values({

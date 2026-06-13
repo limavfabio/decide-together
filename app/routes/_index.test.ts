@@ -8,7 +8,6 @@ vi.mock("~/domains/rooms/room.server", () => ({
 }));
 
 const roomServer = vi.mocked({ createRoom });
-const context = {} as never;
 const pattern = {} as never;
 
 describe("home route", () => {
@@ -24,7 +23,7 @@ describe("home route", () => {
         body: formData,
       }),
       params: {},
-      context,
+      context: createTestContext(),
       url: new URL("http://localhost/"),
       pattern,
     });
@@ -56,12 +55,12 @@ describe("home route", () => {
         body: formData,
       }),
       params: {},
-      context,
+      context: createTestContext(),
       url: new URL("http://localhost/"),
       pattern,
     });
 
-    expect(roomServer.createRoom).toHaveBeenCalledWith({
+    expect(roomServer.createRoom).toHaveBeenCalledWith(expect.anything(), {
       question: "Where should we eat?",
       options: ["Pizza", "Ramen"],
     });
@@ -76,3 +75,12 @@ describe("home route", () => {
     );
   });
 });
+
+function createTestContext() {
+  return {
+    cloudflare: {
+      env: { DB: {} as D1Database },
+      ctx: {} as ExecutionContext,
+    },
+  };
+}

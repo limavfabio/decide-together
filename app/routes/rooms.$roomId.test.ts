@@ -9,7 +9,6 @@ vi.mock("~/domains/rooms/room.server", () => ({
 }));
 
 const roomServer = vi.mocked({ castVote, getRoom });
-const context = {} as never;
 const pattern = {} as never;
 
 const room = {
@@ -51,13 +50,17 @@ describe("room route", () => {
         headers: { Cookie: "decision_voter_id=voter-1" },
       }),
       params: { roomId: "room-1" },
-      context,
+      context: createTestContext(),
       url: new URL("http://localhost/rooms/room-1"),
       pattern,
     });
 
     expect(result).toBe(room);
-    expect(roomServer.getRoom).toHaveBeenCalledWith("room-1", "voter-1");
+    expect(roomServer.getRoom).toHaveBeenCalledWith(
+      expect.anything(),
+      "room-1",
+      "voter-1",
+    );
   });
 
   it("throws a 404 response when the room does not exist", async () => {
@@ -67,7 +70,7 @@ describe("room route", () => {
       loader({
         request: new Request("http://localhost/rooms/missing-room"),
         params: { roomId: "missing-room" },
-        context,
+        context: createTestContext(),
         url: new URL("http://localhost/rooms/missing-room"),
         pattern,
       }),
@@ -90,14 +93,19 @@ describe("room route", () => {
         headers: { Cookie: "decision_voter_id=voter-1" },
       }),
       params: { roomId: "room-1" },
-      context,
+      context: createTestContext(),
       url: new URL("http://localhost/rooms/room-1"),
       pattern,
     });
 
-    expect(roomServer.castVote).toHaveBeenCalledWith("room-1", "voter-1", {
-      optionId: "option-1",
-    });
+    expect(roomServer.castVote).toHaveBeenCalledWith(
+      expect.anything(),
+      "room-1",
+      "voter-1",
+      {
+        optionId: "option-1",
+      },
+    );
     const response = routeResultToResponse(result);
 
     expect(response.status).toBe(200);
@@ -118,7 +126,7 @@ describe("room route", () => {
         headers: { Cookie: "decision_voter_id=voter-1" },
       }),
       params: { roomId: "room-1" },
-      context,
+      context: createTestContext(),
       url: new URL("http://localhost/rooms/room-1"),
       pattern,
     });
@@ -152,14 +160,19 @@ describe("room route", () => {
         headers: { Cookie: "decision_voter_id=voter-1" },
       }),
       params: { roomId: "room-1" },
-      context,
+      context: createTestContext(),
       url: new URL("http://localhost/rooms/room-1"),
       pattern,
     });
 
-    expect(roomServer.castVote).toHaveBeenCalledWith("room-1", "voter-1", {
-      optionId: "option-9",
-    });
+    expect(roomServer.castVote).toHaveBeenCalledWith(
+      expect.anything(),
+      "room-1",
+      "voter-1",
+      {
+        optionId: "option-9",
+      },
+    );
     const response = routeResultToResponse(result);
 
     expect(response.status).toBe(400);
@@ -183,6 +196,15 @@ async function catchRouteResponse(result: Promise<unknown>) {
   }
 
   throw new Error("Expected route to throw a response");
+}
+
+function createTestContext() {
+  return {
+    cloudflare: {
+      env: { DB: {} as D1Database },
+      ctx: {} as ExecutionContext,
+    },
+  };
 }
 
 function routeResultToResponse(result: unknown) {

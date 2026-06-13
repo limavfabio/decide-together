@@ -5,27 +5,28 @@
   "scripts": {
     "build": "react-router build",
     "dev": "react-router dev",
-    "db:migrate": "drizzle-kit migrate",
-    "start": "react-router-serve ./build/server/index.js",
+    "preview": "pnpm build && vite preview",
+    "deploy": "pnpm build && wrangler deploy workers/deploy.ts",
+    "typegen": "wrangler types && react-router typegen",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "wrangler d1 migrations apply decide-together --local",
+    "db:migrate:remote": "wrangler d1 migrations apply decide-together --remote",
     "test": "vitest run",
-    "typecheck": "react-router typegen && tsc"
+    "typecheck": "pnpm typegen && tsc"
   },
   "dependencies": {
     "@react-router/fs-routes": "^7.17.0",
-    "@react-router/node": "7.16.0",
-    "@react-router/serve": "7.16.0",
-    "better-sqlite3": "^12.10.0",
     "drizzle-orm": "^0.45.2",
     "isbot": "^5.1.42",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "react-router": "7.16.0",
+    "react-router": "7.17.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@react-router/dev": "7.16.0",
+    "@cloudflare/vite-plugin": "^1.40.2",
+    "@react-router/dev": "7.17.0",
     "@tailwindcss/vite": "^4.3.1",
-    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^22.19.21",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
@@ -33,6 +34,7 @@
     "tailwindcss": "^4.3.1",
     "typescript": "^5.9.3",
     "vite": "^8.0.16",
-    "vitest": "^4.1.8"
+    "vitest": "^4.1.8",
+    "wrangler": "^4.100.0"
   }
 }

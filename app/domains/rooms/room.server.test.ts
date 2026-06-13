@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { castVote, createRoom, getRoom } from "./room.server";
+import type { Db } from "~/db.server";
 import {
   findRoom,
   findVoterOption,
@@ -33,6 +34,7 @@ const repo = vi.mocked({
 
 const createdRoomId = "00000000-0000-4000-8000-000000000001";
 const createdAt = new Date("2026-06-11T00:00:00.000Z");
+const db = {} as Db;
 
 describe("room server", () => {
   beforeEach(() => {
@@ -43,13 +45,13 @@ describe("room server", () => {
     it("creates a room with the given question and options", async () => {
       repo.insertRoom.mockResolvedValue(createdRoomId);
 
-      const roomId = await createRoom({
+      const roomId = await createRoom(db, {
         question: "Where should we eat?",
         options: ["Pizza", "Ramen"],
       });
 
       expect(roomId).toBe("00000000-0000-4000-8000-000000000001");
-      expect(repo.insertRoom).toHaveBeenCalledWith("Where should we eat?", [
+      expect(repo.insertRoom).toHaveBeenCalledWith(db, "Where should we eat?", [
         "Pizza",
         "Ramen",
       ]);
@@ -62,7 +64,7 @@ describe("room server", () => {
         null as unknown as Awaited<ReturnType<typeof findRoom>>,
       );
 
-      await expect(getRoom("missing-room", "voter-1")).resolves.toBeNull();
+      await expect(getRoom(db, "missing-room", "voter-1")).resolves.toBeNull();
 
       expect(repo.listRoomOptions).not.toHaveBeenCalled();
       expect(repo.listVoteTotals).not.toHaveBeenCalled();
@@ -94,7 +96,7 @@ describe("room server", () => {
       );
       repo.findVoterOption.mockResolvedValue("option-2");
 
-      await expect(getRoom("room-1", "voter-1")).resolves.toEqual({
+      await expect(getRoom(db, "room-1", "voter-1")).resolves.toEqual({
         room,
         options: [
           { ...firstOption, votes: 3 },
@@ -104,8 +106,11 @@ describe("room server", () => {
         totalVotes: 4,
       });
 
-      expect(repo.listVoteTotals).toHaveBeenCalledWith(["option-1", "option-2"]);
-      expect(repo.findVoterOption).toHaveBeenCalledWith("room-1", "voter-1");
+      expect(repo.listVoteTotals).toHaveBeenCalledWith(db, [
+        "option-1",
+        "option-2",
+      ]);
+      expect(repo.findVoterOption).toHaveBeenCalledWith(db, "room-1", "voter-1");
     });
 
     it("defaults missing vote totals to zero", async () => {
@@ -125,7 +130,7 @@ describe("room server", () => {
       repo.listVoteTotals.mockResolvedValue(new Map());
       repo.findVoterOption.mockResolvedValue(null);
 
-      const result = await getRoom("room-1", null);
+      const result = await getRoom(db, "room-1", null);
 
       expect(result?.options).toEqual([{ ...option, votes: 0 }]);
       expect(result?.selectedOptionId).toBeNull();
@@ -138,7 +143,7 @@ describe("room server", () => {
       repo.optionBelongsToRoom.mockResolvedValue(false);
 
       await expect(
-        castVote("room-1", "voter-1", { optionId: "option-9" }),
+        castVote(db, "room-1", "voter-1", { optionId: "option-9" }),
       ).resolves.toEqual({
         ok: false,
         error: "Essa opção não pertence a esta sala.",
@@ -152,10 +157,11 @@ describe("room server", () => {
       repo.upsertVote.mockResolvedValue(undefined);
 
       await expect(
-        castVote("room-1", "voter-1", { optionId: "option-1" }),
+        castVote(db, "room-1", "voter-1", { optionId: "option-1" }),
       ).resolves.toEqual({ ok: true });
 
       expect(repo.upsertVote).toHaveBeenCalledWith(
+        db,
         "room-1",
         "voter-1",
         "option-1",
