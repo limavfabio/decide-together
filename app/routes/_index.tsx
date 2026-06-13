@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Form, redirect } from "react-router";
+import { Form, redirect, useNavigation } from "react-router";
 import * as z from "zod";
 
 import type { Route } from "./+types/_index";
@@ -54,16 +54,21 @@ export async function action({ context, request }: Route.ActionArgs) {
     };
   }
 
-  const roomId = await createRoom(dbFromContext(context), createRoomParams.data);
+  const roomId = await createRoom(
+    dbFromContext(context),
+    createRoomParams.data,
+  );
 
   return redirect(`/rooms/${roomId}`);
 }
 
 export default function Home({ actionData, loaderData }: Route.ComponentProps) {
+  const navigation = useNavigation();
   const values = actionData?.values;
   const errors = actionData?.errors;
   const initialOptions = normalizeOptionRows(values?.options);
   const [options, setOptions] = useState(initialOptions);
+  const isCreating = navigation.state !== "idle";
 
   useEffect(() => {
     setOptions(initialOptions);
@@ -184,9 +189,10 @@ export default function Home({ actionData, loaderData }: Route.ComponentProps) {
 
           <button
             type="submit"
-            className="w-full border-2 border-[#221f1a] bg-[#f2c14e] px-5 py-4 text-lg font-black uppercase tracking-[0.12em] transition hover:-translate-y-0.5 hover:shadow-[6px_6px_0_#221f1a] sm:w-fit"
+            disabled={isCreating}
+            className="w-full border-2 border-[#221f1a] bg-[#f2c14e] px-5 py-4 text-lg font-black uppercase tracking-[0.12em] transition enabled:hover:-translate-y-0.5 enabled:hover:shadow-[6px_6px_0_#221f1a] disabled:cursor-wait disabled:opacity-70 sm:w-fit"
           >
-            Criar sala
+            {isCreating ? "Criando..." : "Criar sala"}
           </button>
         </Form>
       </section>
