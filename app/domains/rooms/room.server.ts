@@ -40,7 +40,7 @@ export async function castVote(roomId: string, voterId: string, params: VotePara
   const validOption = await optionBelongsToRoom(roomId, params.optionId);
 
   if (!validOption) {
-    return { ok: false as const, error: "That option does not belong to this room." };
+    return { ok: false as const, error: "Essa opção não pertence a esta sala." };
   }
 
   await upsertVote(roomId, voterId, params.optionId);

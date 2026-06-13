@@ -141,7 +141,7 @@ describe("room server", () => {
         castVote("room-1", "voter-1", { optionId: "option-9" }),
       ).resolves.toEqual({
         ok: false,
-        error: "That option does not belong to this room.",
+        error: "Essa opção não pertence a esta sala.",
       });
 
       expect(repo.upsertVote).not.toHaveBeenCalled();

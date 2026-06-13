@@ -11,14 +11,32 @@ import {
 } from "~/domains/rooms/params";
 import { createRoom } from "~/domains/rooms/room.server";
 
+const questionPlaceholders = [
+  "O que vamos comer hoje?",
+  "Qual filme vamos assistir?",
+  "Onde vai ser o encontro?",
+  "Que dia funciona melhor?",
+  "Qual o plano para o fim de semana?",
+  "Qual a boa para hoje à noite?",
+];
+
 export function meta({}: Route.MetaArgs) {
   return [
     { title: "Decide Together" },
     {
       name: "description",
-      content: "Create a quick voting room for a group decision.",
+      content: "Crie uma sala de votação rápida para uma decisão em grupo.",
     },
   ];
+}
+
+export function loader() {
+  return {
+    questionPlaceholder:
+      questionPlaceholders[
+        Math.floor(Math.random() * questionPlaceholders.length)
+      ],
+  };
 }
 
 export async function action({ request }: Route.ActionArgs) {
@@ -40,7 +58,7 @@ export async function action({ request }: Route.ActionArgs) {
   return redirect(`/rooms/${roomId}`);
 }
 
-export default function Home({ actionData }: Route.ComponentProps) {
+export default function Home({ actionData, loaderData }: Route.ComponentProps) {
   const values = actionData?.values;
   const errors = actionData?.errors;
   const initialOptions = normalizeOptionRows(values?.options);
@@ -79,10 +97,10 @@ export default function Home({ actionData }: Route.ComponentProps) {
       <section className="mx-auto flex min-h-screen w-full max-w-5xl flex-col justify-center px-5 py-10">
         <div className="mb-10 max-w-3xl">
           <p className="mb-4 text-sm font-bold uppercase tracking-[0.24em] text-[#8a3b16]">
-            Quick group decisions
+            Decisões rápidas em grupo
           </p>
           <h1 className="max-w-3xl text-5xl font-black leading-[0.95] tracking-tight sm:text-7xl">
-            Put the options on the table. Let the room decide.
+            Coloque as opções na mesa. Deixe a sala decidir.
           </h1>
         </div>
 
@@ -95,7 +113,7 @@ export default function Home({ actionData }: Route.ComponentProps) {
               htmlFor="question"
               className="mb-2 block text-sm font-bold uppercase tracking-[0.18em]"
             >
-              Question
+              Pergunta
             </label>
             <input
               id="question"
@@ -103,7 +121,7 @@ export default function Home({ actionData }: Route.ComponentProps) {
               type="text"
               maxLength={140}
               defaultValue={values?.question}
-              placeholder="What are we eating tonight?"
+              placeholder={loaderData.questionPlaceholder}
               className="w-full border-2 border-[#221f1a] bg-white px-4 py-4 text-xl font-semibold outline-none transition focus:shadow-[6px_6px_0_#221f1a]"
             />
             {errors?.question ? (
@@ -116,10 +134,10 @@ export default function Home({ actionData }: Route.ComponentProps) {
           <div>
             <div className="mb-2 flex items-end justify-between gap-4">
               <label className="block text-sm font-bold uppercase tracking-[0.18em]">
-                Options
+                Opções
               </label>
               <p className="text-sm font-semibold text-[#6f675c]">
-                2-10 choices
+                2 a 10 escolhas
               </p>
             </div>
             <div className="grid gap-3">
@@ -130,8 +148,10 @@ export default function Home({ actionData }: Route.ComponentProps) {
                     type="text"
                     maxLength={80}
                     value={option}
-                    onChange={(event) => updateOption(index, event.target.value)}
-                    placeholder={`Option ${index + 1}`}
+                    onChange={(event) =>
+                      updateOption(index, event.target.value)
+                    }
+                    placeholder={`Opção ${index + 1}`}
                     className="min-w-0 flex-1 border-2 border-[#221f1a] bg-white px-4 py-3 font-semibold outline-none transition focus:shadow-[5px_5px_0_#221f1a]"
                   />
                   {options.length > MIN_ROOM_OPTIONS ? (
@@ -140,7 +160,7 @@ export default function Home({ actionData }: Route.ComponentProps) {
                       onClick={() => removeOption(index)}
                       className="border-2 border-[#221f1a] bg-white px-4 py-3 text-sm font-black uppercase tracking-[0.08em] transition hover:-translate-y-0.5 hover:shadow-[4px_4px_0_#221f1a]"
                     >
-                      Remove
+                      Remover
                     </button>
                   ) : null}
                 </div>
@@ -157,7 +177,7 @@ export default function Home({ actionData }: Route.ComponentProps) {
               disabled={options.length >= MAX_ROOM_OPTIONS}
               className="mt-4 border-2 border-[#221f1a] bg-white px-4 py-3 text-sm font-black uppercase tracking-[0.1em] transition enabled:hover:-translate-y-0.5 enabled:hover:shadow-[4px_4px_0_#221f1a] disabled:cursor-not-allowed disabled:opacity-45"
             >
-              Add option
+              Adicionar opção
             </button>
           </div>
 
@@ -165,7 +185,7 @@ export default function Home({ actionData }: Route.ComponentProps) {
             type="submit"
             className="w-full border-2 border-[#221f1a] bg-[#f2c14e] px-5 py-4 text-lg font-black uppercase tracking-[0.12em] transition hover:-translate-y-0.5 hover:shadow-[6px_6px_0_#221f1a] sm:w-fit"
           >
-            Create room
+            Criar sala
           </button>
         </Form>
       </section>

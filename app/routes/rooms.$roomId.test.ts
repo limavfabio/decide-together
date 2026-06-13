@@ -74,7 +74,7 @@ describe("room route", () => {
     );
 
     expect(response.status).toBe(404);
-    await expect(response.text()).resolves.toBe("Room not found");
+    await expect(response.text()).resolves.toBe("Sala não encontrada");
   });
 
   it("casts a vote and sets the existing voter cookie", async () => {
@@ -132,14 +132,14 @@ describe("room route", () => {
     );
     await expect(response.json()).resolves.toEqual({
       ok: false,
-      errors: { optionId: ["Choose an option"] },
+      errors: { optionId: ["Escolha uma opção"] },
     });
   });
 
   it("returns domain errors for options outside the room", async () => {
     roomServer.castVote.mockResolvedValue({
       ok: false,
-      error: "That option does not belong to this room.",
+      error: "Essa opção não pertence a esta sala.",
     });
 
     const formData = new FormData();
@@ -169,7 +169,7 @@ describe("room route", () => {
     await expect(response.json()).resolves.toEqual({
       ok: false,
       errors: {
-        optionId: ["That option does not belong to this room."],
+        optionId: ["Essa opção não pertence a esta sala."],
       },
     });
   });

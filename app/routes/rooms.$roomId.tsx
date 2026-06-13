@@ -9,8 +9,8 @@ import { ensureVoterId, getVoterId, voterCookieHeader } from "~/domains/rooms/vo
 
 export function meta({ data: loaderData }: Route.MetaArgs) {
   return [
-    { title: loaderData ? `${loaderData.room.question} · Decide Together` : "Room not found" },
-    { name: "description", content: "Vote on a shared group decision." },
+    { title: loaderData ? `${loaderData.room.question} · Decide Together` : "Sala não encontrada" },
+    { name: "description", content: "Vote em uma decisão compartilhada do grupo." },
   ];
 }
 
@@ -18,7 +18,7 @@ export async function loader({ params, request }: Route.LoaderArgs) {
   const room = await getRoom(params.roomId, getVoterId(request));
 
   if (!room) {
-    throw data("Room not found", { status: 404 });
+    throw data("Sala não encontrada", { status: 404 });
   }
 
   return room;
@@ -73,7 +73,7 @@ export default function Room({ loaderData }: Route.ComponentProps) {
         <div className="flex flex-col gap-4 border-b-2 border-[#221f1a] pb-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="mb-3 text-sm font-bold uppercase tracking-[0.24em] text-[#8a3b16]">
-              Voting room
+              Sala de votação
             </p>
             <h1 className="max-w-3xl text-4xl font-black leading-none tracking-tight sm:text-6xl">
               {loaderData.room.question}
@@ -81,7 +81,7 @@ export default function Room({ loaderData }: Route.ComponentProps) {
           </div>
           <Form action="/" className="shrink-0">
             <button className="border-2 border-[#221f1a] bg-white px-4 py-3 text-sm font-black uppercase tracking-[0.12em] transition hover:shadow-[4px_4px_0_#221f1a]">
-              New room
+              Nova sala
             </button>
           </Form>
         </div>
@@ -109,7 +109,7 @@ export default function Room({ loaderData }: Route.ComponentProps) {
                   <span>
                     <span className="block text-xl font-black">{option.label}</span>
                     <span className="mt-1 block text-sm font-bold text-[#6f675c]">
-                      {selected ? "Your vote" : "Vote for this"}
+                      {selected ? "Seu voto" : "Votar nesta opção"}
                     </span>
                   </span>
                   <span className="text-2xl font-black tabular-nums">
@@ -124,13 +124,13 @@ export default function Room({ loaderData }: Route.ComponentProps) {
         {actionErrors?.optionId ? <p className="font-semibold text-[#a12818]">{actionErrors.optionId[0]}</p> : null}
 
         <div className="grid gap-3 text-sm font-semibold text-[#6f675c] sm:grid-cols-[1fr_auto] sm:items-center">
-          <p>{loaderData.totalVotes} total votes. Share this page with the group.</p>
+          <p>{loaderData.totalVotes} votos no total. Compartilhe esta página com o grupo.</p>
           <input
             readOnly
             value={shareUrl}
             className="min-w-0 border-2 border-[#221f1a] bg-white px-3 py-2 font-mono text-xs text-[#221f1a]"
             onFocus={(event) => event.currentTarget.select()}
-            aria-label="Share URL"
+            aria-label="URL para compartilhar"
           />
         </div>
       </section>

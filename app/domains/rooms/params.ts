@@ -7,20 +7,20 @@ export const DEFAULT_ROOM_OPTIONS = 2;
 const optionLabel = z
   .string()
   .trim()
-  .min(1, "Option cannot be blank")
-  .max(80, "Keep options under 80 characters");
+  .min(1, "A opção não pode ficar em branco")
+  .max(80, "Use até 80 caracteres por opção");
 
 export const createRoomParams = z
   .object({
     question: z
       .string()
       .trim()
-      .min(1, "Question cannot be blank")
-      .max(140, "Keep the question under 140 characters"),
+      .min(1, "A pergunta não pode ficar em branco")
+      .max(140, "Use até 140 caracteres na pergunta"),
     options: z
       .array(optionLabel)
-      .min(MIN_ROOM_OPTIONS, "Add at least 2 options")
-      .max(MAX_ROOM_OPTIONS, "Add no more than 10 options"),
+      .min(MIN_ROOM_OPTIONS, "Adicione pelo menos 2 opções")
+      .max(MAX_ROOM_OPTIONS, "Adicione no máximo 10 opções"),
   })
   .superRefine(({ options }, ctx) => {
     const seen = new Set<string>();
@@ -31,7 +31,7 @@ export const createRoomParams = z
       if (seen.has(key)) {
         ctx.addIssue({
           code: "custom",
-          message: "Options must be unique",
+          message: "As opções não podem se repetir",
           path: ["options", index],
         });
       }
@@ -41,7 +41,7 @@ export const createRoomParams = z
   });
 
 export const voteParams = z.object({
-  optionId: z.string().min(1, "Choose an option"),
+  optionId: z.string().min(1, "Escolha uma opção"),
 });
 
 export type CreateRoomParams = z.infer<typeof createRoomParams>;

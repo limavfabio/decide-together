@@ -35,8 +35,8 @@ describe("home route", () => {
         options: ["Pizza", ""],
       },
       errors: {
-        question: ["Question cannot be blank"],
-        options: ["Add at least 2 options"],
+        question: ["A pergunta não pode ficar em branco"],
+        options: ["Adicione pelo menos 2 opções"],
       },
     });
     expect(roomServer.createRoom).not.toHaveBeenCalled();
