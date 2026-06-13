@@ -1,4 +1,5 @@
-import { data, Form, useFetcher } from "react-router";
+import { useEffect } from "react";
+import { data, Form, useFetcher, useRevalidator } from "react-router";
 import * as z from "zod";
 
 import type { Route } from "./+types/rooms.$roomId";
@@ -49,11 +50,22 @@ export async function action({ params, request }: Route.ActionArgs) {
 
 export default function Room({ loaderData }: Route.ComponentProps) {
   const fetcher = useFetcher<typeof action>();
+  const revalidator = useRevalidator();
   const isVoting = fetcher.state !== "idle";
   const actionErrors = (
     fetcher.data && "errors" in fetcher.data ? fetcher.data.errors : null
   ) as { optionId?: string[] } | null;
   const shareUrl = typeof window === "undefined" ? "" : window.location.href;
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      if (revalidator.state === "idle") {
+        revalidator.revalidate();
+      }
+    }, 1_000);
+
+    return () => window.clearInterval(interval);
+  }, [revalidator]);
 
   return (
     <main className="min-h-screen bg-[#f5f1e8] text-[#221f1a]">
